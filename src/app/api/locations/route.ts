@@ -49,7 +49,15 @@ export async function POST(req: Request) {
         const { name, country } = result.data;
 
         // Fetch coordinates
-        const coords = await WeatherService.getCoordinates(name, country);
+        let coords;
+        try {
+            coords = await WeatherService.getCoordinates(name, country);
+        } catch (error: any) {
+            if (error.message === 'City not found') {
+                return NextResponse.json({ error: 'City not found. Please check the spelling.' }, { status: 404 });
+            }
+            throw error; // Re-throw other errors to be caught by the outer catch
+        }
 
         const [newLocation] = await db.insert(locations).values({
             name,
