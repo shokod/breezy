@@ -1,40 +1,27 @@
 'use client';
 
-import { useState } from 'react';
 import styles from './WeatherCard.module.css';
-import type { Location } from '../../../database/schema';
+import { useUpdateLocation, useDeleteLocation } from '@/hooks/useWeather';
+import type { Location } from '@/../database/schema';
 
 interface WeatherCardProps {
     location: Location;
-    onDelete: () => void;
-    onUpdate: () => void;
 }
 
-export default function WeatherCard({ location, onDelete, onUpdate }: WeatherCardProps) {
-    const [isDeleting, setIsDeleting] = useState(false);
+export default function WeatherCard({ location }: WeatherCardProps) {
+    const updateMutation = useUpdateLocation();
+    const deleteMutation = useDeleteLocation();
 
-    const toggleFavorite = async () => {
-        try {
-            await fetch(`/api/locations/${location.id}`, {
-                method: 'PATCH',
-                body: JSON.stringify({ isFavorite: !location.isFavorite }),
-            });
-            onUpdate();
-        } catch (err) {
-            console.error('Failed to toggle favorite:', err);
-        }
+    const toggleFavorite = () => {
+        updateMutation.mutate({
+            id: location.id,
+            isFavorite: !location.isFavorite
+        });
     };
 
-    const removeLocation = async () => {
-        if (!confirm(`Remove ${location.name}?`)) return;
-        setIsDeleting(true);
-        try {
-            const res = await fetch(`/api/locations/${location.id}`, { method: 'DELETE' });
-            if (res.ok) onDelete();
-        } catch (err) {
-            console.error('Failed to delete:', err);
-        } finally {
-            setIsDeleting(false);
+    const removeLocation = () => {
+        if (confirm(`Remove ${location.name}?`)) {
+            deleteMutation.mutate(location.id);
         }
     };
 
@@ -48,7 +35,7 @@ export default function WeatherCard({ location, onDelete, onUpdate }: WeatherCar
                 <button
                     onClick={toggleFavorite}
                     className={styles.favBtn}
-                    aria-label="Toggle favorite"
+                    disabled={updateMutation.isPending}
                 >
                     {location.isFavorite ? '★' : '☆'}
                 </button>
@@ -58,9 +45,9 @@ export default function WeatherCard({ location, onDelete, onUpdate }: WeatherCar
                 <button
                     onClick={removeLocation}
                     className={styles.deleteBtn}
-                    disabled={isDeleting}
+                    disabled={deleteMutation.isPending}
                 >
-                    {isDeleting ? 'Removing...' : 'Remove'}
+                    {deleteMutation.isPending ? 'Removing...' : 'Remove'}
                 </button>
             </div>
         </div>

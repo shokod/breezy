@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { locations } from '../../../../database/schema';
 import { eq } from 'drizzle-orm';
+import { locationInputSchema, locationUpdateSchema } from '@/lib/schemas';
 
 export async function GET() {
     try {
@@ -16,11 +17,16 @@ export async function GET() {
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { name, country, lat, lon } = body;
+        const result = locationInputSchema.safeParse(body);
 
-        if (!name || !country || lat === undefined || lon === undefined) {
-            return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+        if (!result.success) {
+            return NextResponse.json({
+                error: 'Validation failed',
+                details: result.error.flatten()
+            }, { status: 400 });
         }
+
+        const { name, country, lat, lon } = result.data;
 
         const [newLocation] = await db.insert(locations).values({
             name,

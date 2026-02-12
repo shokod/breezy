@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { locations } from '../../../../../database/schema';
 import { eq } from 'drizzle-orm';
+import { locationUpdateSchema } from '@/lib/schemas';
 
 export async function PATCH(
     req: Request,
@@ -14,11 +15,18 @@ export async function PATCH(
         }
 
         const body = await req.json();
-        const { isFavorite, name } = body;
+        const result = locationUpdateSchema.safeParse(body);
+
+        if (!result.success) {
+            return NextResponse.json({
+                error: 'Validation failed',
+                details: result.error.flatten()
+            }, { status: 400 });
+        }
 
         const [updatedLocation] = await db
             .update(locations)
-            .set({ isFavorite, name })
+            .set(result.data)
             .where(eq(locations.id, id))
             .returning();
 
