@@ -109,6 +109,22 @@ export class WeatherService {
         };
     }
 
+    static async getForecastByCoordinates(lat: number, lon: number, units: string = 'metric'): Promise<ForecastData> {
+        if (!this.API_KEY) throw new Error('API key not configured');
+
+        const res = await fetch(
+            `${this.BASE_URL}/forecast?lat=${lat}&lon=${lon}&units=${units}&appid=${this.API_KEY}`
+        );
+
+        if (!res.ok) throw new Error(`Forecast API error: ${res.statusText}`);
+
+        const data = await res.json();
+        return {
+            list: data.list.map((item: any) => this.normalizeWeatherData(item)),
+            city: data.city,
+        };
+    }
+
     private static normalizeWeatherData(data: any): WeatherData {
         return {
             temp: data.main.temp,

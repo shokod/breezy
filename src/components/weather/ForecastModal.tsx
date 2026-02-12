@@ -1,5 +1,5 @@
-'use client';
-
+import { createPortal } from 'react-dom';
+import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import styles from './ForecastModal.module.css';
 import type { ForecastData } from '@/services/weather';
@@ -11,6 +11,17 @@ interface ForecastModalProps {
 }
 
 export default function ForecastModal({ locationId, locationName, onClose }: ForecastModalProps) {
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+        // Prevent background scrolling when modal is open
+        document.body.style.overflow = 'hidden';
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
+    }, []);
+
     const { data, isLoading, isError } = useQuery<ForecastData>({
         queryKey: ['forecast', locationId],
         queryFn: async () => {
@@ -20,7 +31,9 @@ export default function ForecastModal({ locationId, locationName, onClose }: For
         },
     });
 
-    return (
+    if (!mounted) return null;
+
+    return createPortal(
         <div className={styles.overlay} onClick={onClose}>
             <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
                 <header className={styles.header}>
@@ -50,6 +63,7 @@ export default function ForecastModal({ locationId, locationName, onClose }: For
                     </div>
                 )}
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }
