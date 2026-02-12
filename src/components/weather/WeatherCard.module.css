@@ -1,0 +1,64 @@
+.card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow);
+}
+
+.favorite {
+    border-color: var(--primary);
+    background: linear-gradient(135deg, var(--card-bg) 0%, rgba(37, 99, 235, 0.05) 100%);
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+}
+
+.name {
+    font-size: 1.25rem;
+}
+
+.country {
+    color: var(--secondary);
+    font-size: 0.9rem;
+}
+
+.favBtn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #fbbf24;
+    cursor: pointer;
+    padding: 0.25rem;
+    line-height: 1;
+}
+
+.footer {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.deleteBtn {
+    background: none;
+    border: none;
+    color: #ef4444;
+    font-size: 0.85rem;
+    cursor: pointer;
+    opacity: 0.6;
+}
+
+.deleteBtn:hover {
+    opacity: 1;
+    text-decoration: underline;
+}
