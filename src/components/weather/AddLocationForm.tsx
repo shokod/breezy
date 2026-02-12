@@ -25,7 +25,7 @@ export default function AddLocationForm() {
         <form onSubmit={handleSubmit} className={styles.form}>
             <input
                 type="text"
-                placeholder="City (e.g. London)"
+                placeholder="City (e.g. Harare)"
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
                 className={styles.input}
@@ -34,7 +34,7 @@ export default function AddLocationForm() {
             />
             <input
                 type="text"
-                placeholder="Country (e.g. UK)"
+                placeholder="Country (e.g. Zimbabwe)"
                 value={country}
                 onChange={(e) => setCountry(e.target.value)}
                 className={styles.input}

@@ -1,11 +1,11 @@
 'use client';
 
 import styles from './LocationDashboard.module.css';
-import WeatherCard from './WeatherCard';
-import AddLocationForm from './AddLocationForm';
-import SyncButton from './SyncButton';
 import { useLocations } from '@/hooks/useWeather';
 import type { Location } from '@/../database/schema';
+import WeatherCard, { ExtendedLocation } from './WeatherCard';
+import AddLocationForm from './AddLocationForm';
+import SyncButton from './SyncButton';
 
 export default function LocationDashboard() {
     const { data: locations, isLoading, isError } = useLocations();
@@ -24,7 +24,7 @@ export default function LocationDashboard() {
                 {!locations || locations.length === 0 ? (
                     <div className={styles.empty}>No locations tracked yet. Add one above!</div>
                 ) : (
-                    locations.map((loc: Location) => (
+                    locations.map((loc: ExtendedLocation) => (
                         <WeatherCard key={loc.id} location={loc} />
                     ))
                 )}

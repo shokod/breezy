@@ -6,7 +6,7 @@ import { useUpdateLocation, useDeleteLocation } from '@/hooks/useWeather';
 import ForecastModal from './ForecastModal';
 import type { Location, WeatherSnapshot } from '@/../database/schema';
 
-interface ExtendedLocation extends Location {
+export interface ExtendedLocation extends Location {
     latestWeather: WeatherSnapshot | null;
 }
 
