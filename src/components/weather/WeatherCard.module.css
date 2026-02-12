@@ -3,14 +3,17 @@
     border: 1px solid var(--card-border);
     border-radius: var(--radius);
     padding: 1.5rem;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition: all 0.2s ease;
     position: relative;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
 .card:hover {
     transform: translateY(-4px);
     box-shadow: var(--shadow);
+    background: white;
 }
 
 .favorite {
@@ -22,11 +25,12 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
 }
 
 .name {
-    font-size: 1.25rem;
+    font-size: 1.4rem;
+    color: var(--foreground);
 }
 
 .country {
@@ -44,7 +48,80 @@
     line-height: 1;
 }
 
+.weatherInfo {
+    margin: 1rem 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.tempSection {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.temp {
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.icon {
+    width: 60px;
+    height: 60px;
+}
+
+.description {
+    text-transform: capitalize;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.details {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.85rem;
+    color: var(--secondary);
+    background: rgba(0, 0, 0, 0.03);
+    padding: 0.5rem;
+    border-radius: 8px;
+}
+
+.timestamp {
+    font-size: 0.75rem;
+    color: var(--secondary);
+    opacity: 0.7;
+    margin-top: 1rem;
+}
+
+.forecastBtn {
+    margin-top: 1rem;
+    padding: 0.6rem;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.forecastBtn:hover {
+    background: var(--primary-hover);
+}
+
+.noWeather {
+    padding: 2rem 0;
+    text-align: center;
+    color: var(--secondary);
+    font-style: italic;
+    font-size: 0.9rem;
+}
+
 .footer {
+    margin-top: auto;
+    padding-top: 1rem;
     display: flex;
     justify-content: flex-end;
 }

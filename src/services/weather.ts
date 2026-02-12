@@ -24,9 +24,31 @@ export interface ForecastData {
 export class WeatherService {
     private static API_KEY = process.env.OPENWEATHER_API_KEY;
     private static BASE_URL = 'https://api.openweathermap.org/data/2.5';
+    private static GEO_URL = 'http://api.openweathermap.org/geo/1.0';
+
+    static async getCoordinates(city: string, country: string): Promise<{ lat: number; lon: number }> {
+        if (!this.API_KEY) return { lat: 0, lon: 0 }; // Mock fallback
+
+        const res = await fetch(
+            `${this.GEO_URL}/direct?q=${encodeURIComponent(city)},${encodeURIComponent(country)}&limit=1&appid=${this.API_KEY}`
+        );
+
+        if (!res.ok) throw new Error('Geocoding failed');
+        const data = await res.json();
+
+        if (data.length === 0) throw new Error('City not found');
+
+        return {
+            lat: data[0].lat,
+            lon: data[0].lon,
+        };
+    }
 
     static async getCurrentWeather(city: string, units: string = 'metric'): Promise<WeatherData> {
-        if (!this.API_KEY) throw new Error('API key not configured');
+        if (!this.API_KEY) {
+            console.warn('Weather API key missing, using mock data');
+            return this.getMockWeather(city);
+        }
 
         const res = await fetch(
             `${this.BASE_URL}/weather?q=${encodeURIComponent(city)}&units=${units}&appid=${this.API_KEY}`
@@ -38,6 +60,19 @@ export class WeatherService {
 
         const data = await res.json();
         return this.normalizeWeatherData(data);
+    }
+
+    private static getMockWeather(city: string): WeatherData {
+        return {
+            temp: 20 + Math.random() * 10,
+            feelsLike: 22,
+            description: 'cloudy with mock data',
+            icon: '04d',
+            humidity: 50,
+            windSpeed: 5,
+            pressure: 1012,
+            dt: Math.floor(Date.now() / 1000),
+        };
     }
 
     static async getForecast(city: string, units: string = 'metric'): Promise<ForecastData> {

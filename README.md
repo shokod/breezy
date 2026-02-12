@@ -1,36 +1,74 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Breezy Weather 🌬️
 
-## Getting Started
+An advanced weather data integration platform built with Next.js 14, focusing on software engineering excellence, type safety, and a premium user experience.
 
-First, run the development server:
+## 🚀 Features
 
+- **Real-time Weather**: Fetch current conditions for any city worldwide via OpenWeatherMap.
+- **5-Day Forecast**: Predictive weather trends with detailed hourly data.
+- **Background Sync**: Automated weather refreshes every 5 minutes using TanStack Query.
+- **Persistence**: Hybrid persistence using SQLite (LibSQL) and Drizzle ORM.
+- **Strict Validation**: All I/O validated with Zod schemas.
+- **Premium UI**: Custom CSS Modules with a glassmorphism aesthetic and Sonner notifications.
+- **Geocoding**: Automatic city resolution from name to coordinates.
+
+## 🛠️ Tech Stack
+
+- **Framework**: [Next.js 14 (App Router)](https://nextjs.org/)
+- **Database**: [SQLite](https://www.sqlite.org/) with [Drizzle ORM](https://orm.drizzle.team/)
+- **State Management**: [TanStack Query v5](https://tanstack.com/query)
+- **Validation**: [Zod](https://zod.dev/)
+- **Notifications**: [Sonner](https://sonner.emilkowal.ski/)
+- **API**: OpenWeatherMap
+
+## 📦 Getting Started
+
+### 1. Prerequisites
+- Node.js 18+
+- pnpm
+
+### 2. Setup
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# Clone the repository
+git clone https://github.com/your-username/breezy.git
+cd breezy
+
+# Install dependencies
+pnpm install
+
+# Setup Environment
+echo "OPENWEATHER_API_KEY=your_key_here" > .env.local
+
+# Database Setup
+pnpm run db:push
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 3. Run
+```bash
+pnpm run dev
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🏗️ Architectural Decisions
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Clean Architecture
+Logic is separated into distinct layers:
+- **Services**: Pure business logic and external API communication.
+- **Hooks**: Centralized server-state management.
+- **API Routes**: Type-safe REST endpoints with Zod validation.
+- **Components**: Presentation layer following a modular design system.
 
-## Learn More
+### Why TanStack Query?
+We chose TanStack Query to manage server state. It provides built-in caching, background revalidation, and optimistic updates, which are critical for a data-heavy weather application.
 
-To learn more about Next.js, take a look at the following resources:
+### Drizzle + SQLite
+SQLite provides a lightweight, local-first experience. Drizzle adds type safety to our SQL queries without the overhead of heavy ORMs.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🧪 Testing
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+pnpm run test
+```
+Tests cover service layer logic, geocoding resolution, and data normalization.
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+Built with ❤️ by Antigravity

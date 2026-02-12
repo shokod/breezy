@@ -1,13 +1,33 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { locations } from '../../../../database/schema';
-import { eq } from 'drizzle-orm';
-import { locationInputSchema, locationUpdateSchema } from '@/lib/schemas';
+import { locations, weatherSnapshots } from '@/../database/schema';
+import { eq, desc } from 'drizzle-orm';
+import { locationInputSchema } from '@/lib/schemas';
+import { WeatherService } from '@/services/weather';
 
 export async function GET() {
     try {
         const allLocations = await db.select().from(locations).all();
-        return NextResponse.json(allLocations, { status: 200 });
+
+        // For each location, get the latest snapshot
+        const locationsWithWeather = await Promise.all(
+            allLocations.map(async (loc) => {
+                const latestWeather = await db
+                    .select()
+                    .from(weatherSnapshots)
+                    .where(eq(weatherSnapshots.locationId, loc.id))
+                    .orderBy(desc(weatherSnapshots.timestamp))
+                    .limit(1)
+                    .get();
+
+                return {
+                    ...loc,
+                    latestWeather: latestWeather || null,
+                };
+            })
+        );
+
+        return NextResponse.json(locationsWithWeather, { status: 200 });
     } catch (error) {
         console.error('Failed to fetch locations:', error);
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
@@ -26,13 +46,16 @@ export async function POST(req: Request) {
             }, { status: 400 });
         }
 
-        const { name, country, lat, lon } = result.data;
+        const { name, country } = result.data;
+
+        // Fetch coordinates
+        const coords = await WeatherService.getCoordinates(name, country);
 
         const [newLocation] = await db.insert(locations).values({
             name,
             country,
-            lat,
-            lon,
+            lat: coords.lat,
+            lon: coords.lon,
         }).returning();
 
         return NextResponse.json(newLocation, { status: 201 });

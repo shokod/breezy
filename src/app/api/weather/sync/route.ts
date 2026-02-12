@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { locations, weatherSnapshots } from '../../../../database/schema';
+import { locations, weatherSnapshots } from '@/../database/schema';
 import { WeatherService } from '@/services/weather';
 
 export async function POST() {
@@ -18,6 +18,7 @@ export async function POST() {
                 await db.insert(weatherSnapshots).values({
                     locationId: location.id,
                     temp: weather.temp,
+                    feelsLike: weather.feelsLike,
                     description: weather.description,
                     icon: weather.icon,
                     humidity: weather.humidity,

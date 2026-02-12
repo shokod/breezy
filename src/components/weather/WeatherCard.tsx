@@ -1,16 +1,24 @@
 'use client';
 
+import { useState } from 'react';
 import styles from './WeatherCard.module.css';
 import { useUpdateLocation, useDeleteLocation } from '@/hooks/useWeather';
-import type { Location } from '@/../database/schema';
+import ForecastModal from './ForecastModal';
+import type { Location, WeatherSnapshot } from '@/../database/schema';
+
+interface ExtendedLocation extends Location {
+    latestWeather: WeatherSnapshot | null;
+}
 
 interface WeatherCardProps {
-    location: Location;
+    location: ExtendedLocation;
 }
 
 export default function WeatherCard({ location }: WeatherCardProps) {
+    const [showForecast, setShowForecast] = useState(false);
     const updateMutation = useUpdateLocation();
     const deleteMutation = useDeleteLocation();
+    const weather = location.latestWeather;
 
     const toggleFavorite = () => {
         updateMutation.mutate({
@@ -36,10 +44,39 @@ export default function WeatherCard({ location }: WeatherCardProps) {
                     onClick={toggleFavorite}
                     className={styles.favBtn}
                     disabled={updateMutation.isPending}
+                    aria-label="Toggle favorite"
                 >
                     {location.isFavorite ? '★' : '☆'}
                 </button>
             </div>
+
+            {weather ? (
+                <div className={styles.weatherInfo}>
+                    <div className={styles.tempSection}>
+                        <span className={styles.temp}>{Math.round(weather.temp)}°</span>
+                        <img
+                            src={`https://openweathermap.org/img/wn/${weather.icon}@2x.png`}
+                            alt={weather.description}
+                            className={styles.icon}
+                        />
+                    </div>
+                    <p className={styles.description}>{weather.description}</p>
+                    <div className={styles.details}>
+                        <span>Humidity: {weather.humidity}%</span>
+                        <span>Wind: {weather.windSpeed}m/s</span>
+                    </div>
+                    <button
+                        className={styles.forecastBtn}
+                        onClick={() => setShowForecast(true)}
+                    >
+                        View 5-Day Forecast
+                    </button>
+                </div>
+            ) : (
+                <div className={styles.noWeather}>
+                    No sync data. Click "Refresh All" to fetch weather.
+                </div>
+            )}
 
             <div className={styles.footer}>
                 <button
@@ -50,6 +87,14 @@ export default function WeatherCard({ location }: WeatherCardProps) {
                     {deleteMutation.isPending ? 'Removing...' : 'Remove'}
                 </button>
             </div>
+
+            {showForecast && (
+                <ForecastModal
+                    locationId={location.id}
+                    locationName={location.name}
+                    onClose={() => setShowForecast(false)}
+                />
+            )}
         </div>
     );
 }
