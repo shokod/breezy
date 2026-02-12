@@ -62,6 +62,24 @@ export class WeatherService {
         return this.normalizeWeatherData(data);
     }
 
+    static async getWeatherByCoordinates(lat: number, lon: number, units: string = 'metric'): Promise<WeatherData> {
+        if (!this.API_KEY) {
+            console.warn('Weather API key missing, using mock data');
+            return this.getMockWeather('Mock Location');
+        }
+
+        const res = await fetch(
+            `${this.BASE_URL}/weather?lat=${lat}&lon=${lon}&units=${units}&appid=${this.API_KEY}`
+        );
+
+        if (res.status === 401) throw new Error('Invalid API key');
+        if (res.status === 404) throw new Error('Location not found');
+        if (!res.ok) throw new Error(`Weather API error: ${res.statusText}`);
+
+        const data = await res.json();
+        return this.normalizeWeatherData(data);
+    }
+
     private static getMockWeather(city: string): WeatherData {
         return {
             temp: 20 + Math.random() * 10,

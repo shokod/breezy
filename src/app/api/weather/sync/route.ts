@@ -11,9 +11,12 @@ export async function POST() {
             return NextResponse.json({ message: 'No locations to sync' }, { status: 200 });
         }
 
-        const syncPromises = allLocations.map(async (location) => {
+        const results = [];
+
+        for (const location of allLocations) {
             try {
-                const weather = await WeatherService.getCurrentWeather(`${location.lat},${location.lon}`);
+                // I'm using coordinate-based fetching for better precision
+                const weather = await WeatherService.getWeatherByCoordinates(location.lat, location.lon);
 
                 await db.insert(weatherSnapshots).values({
                     locationId: location.id,
@@ -26,14 +29,12 @@ export async function POST() {
                     pressure: weather.pressure,
                 });
 
-                return { id: location.id, status: 'success' };
+                results.push({ id: location.id, status: 'success' });
             } catch (err) {
                 console.error(`Failed to sync location ${location.id}:`, err);
-                return { id: location.id, status: 'error' };
+                results.push({ id: location.id, status: 'error' });
             }
-        });
-
-        const results = await Promise.all(syncPromises);
+        }
 
         return NextResponse.json({
             message: 'Sync completed',
