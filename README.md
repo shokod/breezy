@@ -2,7 +2,19 @@
 
 An advanced weather data integration platform built with Next.js 14, focusing on software engineering excellence, type safety, and a premium user experience.
 
-![Breezy Dashboard Demo](breezy_dashboard_demo.png)
+## 🖼️ Screenshots
+
+### Welcome Screen
+![Welcome Screen](public/images/welcome.png)
+
+### Adding a Location
+![Adding a Location](public/images/add_location.png)
+
+### Favorites & Dashboards
+![Favorites List](public/images/favorites_list.png)
+
+### Managing Cities
+![Delete Location](public/images/delete_location.png)
 
 ## 🚀 Features
 

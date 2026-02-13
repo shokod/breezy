@@ -102,7 +102,7 @@ export default function LocationDashboard() {
             ) : (
                 <div className={styles.emptyState}>
                     <h1>Welcome to Breezy</h1>
-                    <p>Add your first city to get started.</p>
+                    <p>No locations saved yet. Add your first city to get started.</p>
                     <button onClick={() => setShowAddLocation(true)} className={styles.btnPrimary}>
                         + Add City
                     </button>
