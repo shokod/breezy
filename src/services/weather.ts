@@ -138,3 +138,9 @@ export class WeatherService {
         };
     }
 }
+
+export const getCoordinates = WeatherService.getCoordinates.bind(WeatherService);
+export const getCurrentWeather = WeatherService.getCurrentWeather.bind(WeatherService);
+export const getWeatherByCoordinates = WeatherService.getWeatherByCoordinates.bind(WeatherService);
+export const getForecast = WeatherService.getForecast.bind(WeatherService);
+export const getForecastByCoordinates = WeatherService.getForecastByCoordinates.bind(WeatherService);

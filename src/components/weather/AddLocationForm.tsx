@@ -6,10 +6,11 @@ import { useAddLocation } from '@/hooks/useWeather';
 
 interface AddLocationFormProps {
     onSuccess?: () => void;
+    initialCity?: string;
 }
 
-export default function AddLocationForm({ onSuccess }: AddLocationFormProps) {
-    const [city, setCity] = useState('');
+export default function AddLocationForm({ onSuccess, initialCity = '' }: AddLocationFormProps) {
+    const [city, setCity] = useState(initialCity);
     const [country, setCountry] = useState('');
     const addMutation = useAddLocation();
 

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import styles from './FloatingSidebar.module.css';
 import { ExtendedLocation } from '@/hooks/useWeather';
+import { Cloud, MapPin, Plus, Settings } from 'lucide-react';
 
 interface FloatingSidebarProps {
     locations: ExtendedLocation[];
@@ -31,6 +32,7 @@ export default function FloatingSidebar({
     return (
         <aside className={styles.sidebar}>
             <div className={styles.brand}>
+                <Cloud size={28} color="var(--primary)" />
                 <span>Breezy</span>
             </div>
 
@@ -43,7 +45,8 @@ export default function FloatingSidebar({
                         className={`${styles.locationItem} ${selectedLocationId === loc.id ? styles.active : ''}`}
                         onClick={() => onSelectLocation(loc.id)}
                     >
-                        <span>{loc.name}</span>
+                        <MapPin size={18} />
+                        <span style={{ flex: 1 }}>{loc.name}</span>
                         {loc.latestWeather && (
                             <span className={styles.temp}>
                                 {Math.round(loc.latestWeather.temp)}{getTempUnit()}
@@ -54,11 +57,13 @@ export default function FloatingSidebar({
             </div>
 
             <div className={styles.footer}>
-                <button className={`${styles.actionBtn} ${styles.footerBtn}`} onClick={onAddLocation}>
-                    <span>+ Add Location</span>
+                <button className={styles.actionBtn} onClick={onAddLocation}>
+                    <Plus size={20} />
+                    <span>Add City</span>
                 </button>
                 <button className={styles.actionBtn} onClick={onOpenSettings}>
-                    <span>⚙ Settings</span>
+                    <Settings size={20} />
+                    <span>Settings</span>
                 </button>
             </div>
         </aside>

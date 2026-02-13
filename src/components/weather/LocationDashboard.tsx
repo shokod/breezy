@@ -4,8 +4,9 @@ import { useState, useEffect } from 'react';
 import styles from './LocationDashboard.module.css';
 import { useLocations, usePreferences, useSyncWeather, ExtendedLocation } from '@/hooks/useWeather';
 import AppShell from '../layout/AppShell';
-import WeatherHero from './WeatherHero';
-import WeatherDetails from './WeatherDetails';
+import CurrentWeatherPanel from './CurrentWeatherPanel';
+import ForecastStrip from './ForecastStrip';
+import TodaysHighlights from './TodaysHighlights';
 import PreferencesModal from './PreferencesModal';
 import AddLocationModal from './AddLocationModal';
 
@@ -18,6 +19,7 @@ export default function LocationDashboard() {
     const [selectedLocationId, setSelectedLocationId] = useState<number | null>(null);
     const [showSettings, setShowSettings] = useState(false);
     const [showAddLocation, setShowAddLocation] = useState(false);
+    const [addLocationInitialCity, setAddLocationInitialCity] = useState('');
 
     // Initial Selection
     useEffect(() => {
@@ -40,14 +42,8 @@ export default function LocationDashboard() {
 
     const units = preferences?.units || 'metric';
 
-    // Determine basic condition for background
-    // If loading, we don't have a selected location yet, so let it be undefined (handled by AppShell/CSS)
     const selectedLocation = locations?.find((l: ExtendedLocation) => l.id === selectedLocationId);
     const hasLocations = locations && locations.length > 0;
-
-    // Day/Night logic (placeholder)
-    const isDay = true;
-    const weatherCondition = selectedLocation?.latestWeather?.description;
 
     return (
         <AppShell
@@ -58,39 +54,34 @@ export default function LocationDashboard() {
             onOpenSettings={() => setShowSettings(true)}
             units={units}
         >
-            <div className="mb-8 border-b border-[var(--card-border)] pb-6">
-                <h1 className="text-3xl font-bold text-[var(--foreground)]">Breezy Weather</h1>
-                <p className="text-[var(--text-secondary)]">Track and manage your favorite city forecasts</p>
-            </div>
-
             {locationsLoading ? (
                 <div className={styles.loading}>Loading Breezy...</div>
             ) : isError ? (
                 <div className={styles.error}>Failed to load locations.</div>
-            ) : hasLocations && selectedLocation ? (
-                <>
-                    {selectedLocation.latestWeather ? (
-                        <>
-                            <WeatherHero
-                                locationName={selectedLocation.name}
-                                weather={selectedLocation.latestWeather}
-                                units={units}
-                            />
-                            <WeatherDetails
-                                weather={selectedLocation.latestWeather}
-                                units={units}
-                            />
-                        </>
-                    ) : (
-                        <div className={styles.emptyState}>
-                            <h2>No Data Available</h2>
-                            <p>Waiting for weather data to sync...</p>
-                            <button onClick={() => syncMutation.mutate()} className={styles.btn}>
-                                Try Syncing Now
-                            </button>
-                        </div>
-                    )}
-                </>
+            ) : hasLocations && selectedLocation && selectedLocation.latestWeather ? (
+                <div className={styles.dashboardGrid}>
+                    <div className={styles.leftPanel}>
+                        <CurrentWeatherPanel
+                            weather={selectedLocation.latestWeather}
+                            locationName={selectedLocation.name}
+                            units={units}
+                            onSearch={(query) => {
+                                setAddLocationInitialCity(query);
+                                setShowAddLocation(true);
+                            }}
+                        />
+                    </div>
+                    <div className={styles.rightPanel}>
+                        <ForecastStrip
+                            locationName={selectedLocation.name}
+                            units={units}
+                        />
+                        <TodaysHighlights
+                            weather={selectedLocation.latestWeather}
+                            units={units}
+                        />
+                    </div>
+                </div>
             ) : (
                 <div className={styles.emptyState}>
                     <h1>Welcome to Breezy</h1>
@@ -98,11 +89,24 @@ export default function LocationDashboard() {
                     <button onClick={() => setShowAddLocation(true)} className={styles.btnPrimary}>
                         + Add City
                     </button>
+                    {hasLocations && !selectedLocation?.latestWeather && (
+                        <button onClick={() => syncMutation.mutate()} className={styles.btn} style={{ marginTop: '1rem' }}>
+                            Force Sync Data
+                        </button>
+                    )}
                 </div>
             )}
 
             {showSettings && <PreferencesModal onClose={() => setShowSettings(false)} />}
-            {showAddLocation && <AddLocationModal onClose={() => setShowAddLocation(false)} />}
+            {showAddLocation && (
+                <AddLocationModal
+                    onClose={() => {
+                        setShowAddLocation(false);
+                        setAddLocationInitialCity('');
+                    }}
+                    initialCity={addLocationInitialCity}
+                />
+            )}
         </AppShell>
     );
 }

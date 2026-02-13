@@ -5,9 +5,10 @@ import { useEffect, useState } from 'react';
 
 interface AddLocationModalProps {
     onClose: () => void;
+    initialCity?: string;
 }
 
-export default function AddLocationModal({ onClose }: AddLocationModalProps) {
+export default function AddLocationModal({ onClose, initialCity }: AddLocationModalProps) {
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
@@ -24,7 +25,7 @@ export default function AddLocationModal({ onClose }: AddLocationModalProps) {
                     <h2>Add New Location</h2>
                     <button className={styles.closeBtn} onClick={onClose}>&times;</button>
                 </div>
-                <AddLocationForm onSuccess={onClose} />
+                <AddLocationForm onSuccess={onClose} initialCity={initialCity} />
             </div>
         </div>,
         document.body
