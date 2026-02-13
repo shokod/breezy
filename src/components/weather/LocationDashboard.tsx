@@ -52,6 +52,11 @@ export default function LocationDashboard() {
     return (
         <AppShell
             locations={locations || []}
+            selectedLocationId={selectedLocationId}
+            onSelectLocation={setSelectedLocationId}
+            onAddLocation={() => setShowAddLocation(true)}
+            onOpenSettings={() => setShowSettings(true)}
+            units={units}
         >
             <div className="mb-8 border-b border-[var(--card-border)] pb-6">
                 <h1 className="text-3xl font-bold text-[var(--foreground)]">Breezy Weather</h1>
