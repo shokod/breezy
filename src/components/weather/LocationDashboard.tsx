@@ -90,7 +90,7 @@ export default function LocationDashboard() {
                     </div>
                     <div className={styles.rightPanel}>
                         <ForecastStrip
-                            locationName={selectedLocation.name}
+                            location={selectedLocation}
                             units={units}
                         />
                         <TodaysHighlights

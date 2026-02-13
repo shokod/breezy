@@ -3,12 +3,12 @@ import { useForecast } from '@/hooks/useWeather';
 import styles from './ForecastStrip.module.css';
 
 interface ForecastStripProps {
-    locationName: string;
+    location: { name: string; lat: number; lon: number } | string;
     units: 'metric' | 'imperial' | 'standard';
 }
 
-export default function ForecastStrip({ locationName, units }: ForecastStripProps) {
-    const { data: forecast, isLoading } = useForecast(locationName, units);
+export default function ForecastStrip({ location, units }: ForecastStripProps) {
+    const { data: forecast, isLoading } = useForecast(location, units);
 
     const [activeTab, setActiveTab] = useState<'today' | 'week'>('week');
 

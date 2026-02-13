@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { locations, weatherSnapshots } from '@/../database/schema';
-import { eq, desc } from 'drizzle-orm';
+import { eq, desc, sql, inArray } from 'drizzle-orm';
 import { locationInputSchema } from '@/lib/schemas';
 import { WeatherService } from '@/services/weather';
 
@@ -9,23 +9,36 @@ export async function GET() {
     try {
         const allLocations = await db.select().from(locations).all();
 
-        // For each location, get the latest snapshot
-        const locationsWithWeather = await Promise.all(
-            allLocations.map(async (loc) => {
-                const latestWeather = await db
-                    .select()
-                    .from(weatherSnapshots)
-                    .where(eq(weatherSnapshots.locationId, loc.id))
-                    .orderBy(desc(weatherSnapshots.timestamp))
-                    .limit(1)
-                    .get();
+        if (allLocations.length === 0) {
+            return NextResponse.json([], { status: 200 });
+        }
 
-                return {
-                    ...loc,
-                    latestWeather: latestWeather || null,
-                };
-            })
-        );
+        // Optimize: Fetch only the latest weather snapshot for each location
+        // 1. Get the latest ID per location using Drizzle query builder
+        const latestIdsResult = await db
+            .select({ id: sql<number>`MAX(${weatherSnapshots.id})` })
+            .from(weatherSnapshots)
+            .groupBy(weatherSnapshots.locationId);
+
+        const latestIds = latestIdsResult
+            .map((r) => r.id)
+            .filter((id): id is number => id !== null);
+
+        // 2. Fetch the actual snapshot data
+        let latestSnapshots: any[] = [];
+        if (latestIds.length > 0) {
+            latestSnapshots = await db
+                .select()
+                .from(weatherSnapshots)
+                .where(inArray(weatherSnapshots.id, latestIds));
+        }
+
+        const snapshotMap = new Map(latestSnapshots.map((s) => [s.locationId, s]));
+
+        const locationsWithWeather = allLocations.map((loc) => ({
+            ...loc,
+            latestWeather: snapshotMap.get(loc.id) || null,
+        }));
 
         return NextResponse.json(locationsWithWeather, { status: 200 });
     } catch (error) {
@@ -57,6 +70,27 @@ export async function POST(req: Request) {
                 return NextResponse.json({ error: 'City not found. Please check the spelling.' }, { status: 404 });
             }
             throw error; // Re-throw other errors to be caught by the outer catch
+        }
+
+        // Check if location already exists (by name or proximity)
+        // We'll use a simple name check first, but proximity would be better long term.
+        // For now, let's check if we have a location with the same name (case-insensitive) OR very close coordinates.
+
+        const existingLocation = await db.query.locations.findFirst({
+            where: (locations, { or, eq, and, between }) => or(
+                eq(locations.name, name),
+                and(
+                    between(locations.lat, coords.lat - 0.1, coords.lat + 0.1),
+                    between(locations.lon, coords.lon - 0.1, coords.lon + 0.1)
+                )
+            ),
+        });
+
+        if (existingLocation) {
+            return NextResponse.json(
+                { error: `Location '${existingLocation.name}' already exists.` },
+                { status: 409 }
+            );
         }
 
         const [newLocation] = await db.insert(locations).values({

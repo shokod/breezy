@@ -53,11 +53,33 @@ export function useUpdateLocation() {
             if (!res.ok) throw new Error('Failed to update location');
             return res.json();
         },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['locations'] });
+        onMutate: async (newLocationData) => {
+            // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
+            await queryClient.cancelQueries({ queryKey: ['locations'] });
+
+            // Snapshot the previous value
+            const previousLocations = queryClient.getQueryData(['locations']);
+
+            // Optimistically update to the new value
+            queryClient.setQueryData(['locations'], (old: ExtendedLocation[] | undefined) => {
+                if (!old) return [];
+                return old.map((location) => {
+                    if (location.id === newLocationData.id) {
+                        return { ...location, ...newLocationData };
+                    }
+                    return location;
+                });
+            });
+
+            // Return a context object with the snapshotted value
+            return { previousLocations };
         },
-        onError: (error: Error) => {
-            toast.error(error.message);
+        onError: (err, newLocation, context) => {
+            queryClient.setQueryData(['locations'], context?.previousLocations);
+            toast.error(err.message);
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries({ queryKey: ['locations'] });
         },
     });
 }
@@ -131,27 +153,26 @@ export function useUpdatePreferences() {
     });
 }
 
-export function useForecast(city: string, units: 'metric' | 'imperial' | 'standard' = 'metric') {
-    return useQuery<ForecastData, Error>({
-        queryKey: ['forecast', city, units],
-        queryFn: async () => {
-            // We can call the service directly since it's a client-side fetch wrapper, 
-            // BUT getForecast in services/weather.ts uses server-side env vars (process.env.OPENWEATHER_API_KEY).
-            // process.env is not available in client components/hooks in the same way for secrets.
-            // However, we recently made getForecast exportable.
-            // IF getForecast uses API_KEY, it will fail on client if NEXT_PUBLIC_ is not used.
-            // Let's check weather.ts again. It uses process.env.OPENWEATHER_API_KEY.
-            // This means we CANNOT call getForecast from the client directly if the key is server-only.
-            // We need an API route for forecast OR use a server action OR expose the key (bad).
-            // Given the existing pattern (api/locations, api/weather/sync), we should probably have an api/weather/forecast route 
-            // OR just call the service if it's a server action. 
-            // Wait, services/weather.ts is just a class. It's not a server action.
-            // So we need to create an API route `/api/weather/forecast` or similar.
+export function useForecast(location: { name: string; lat?: number; lon?: number } | string, units: 'metric' | 'imperial' | 'standard' = 'metric') {
+    const city = typeof location === 'string' ? location : location.name;
+    const lat = typeof location === 'object' ? location.lat : undefined;
+    const lon = typeof location === 'object' ? location.lon : undefined;
 
-            const res = await fetch(`/api/weather/forecast?city=${encodeURIComponent(city)}&units=${units}`);
+    return useQuery<ForecastData, Error>({
+        queryKey: ['forecast', city, lat, lon, units],
+        queryFn: async () => {
+            const params = new URLSearchParams({ units });
+            if (lat !== undefined && lon !== undefined) {
+                params.append('lat', lat.toString());
+                params.append('lon', lon.toString());
+            } else {
+                params.append('city', city);
+            }
+
+            const res = await fetch(`/api/weather/forecast?${params.toString()}`);
             if (!res.ok) throw new Error('Failed to fetch forecast');
             return res.json();
         },
-        enabled: !!city,
+        enabled: !!city || (lat !== undefined && lon !== undefined),
     });
 }

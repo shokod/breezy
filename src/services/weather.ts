@@ -36,7 +36,8 @@ export class WeatherService {
         if (!this.API_KEY) return { lat: 0, lon: 0 };
 
         const res = await fetch(
-            `${this.GEO_URL}/direct?q=${encodeURIComponent(city)},${encodeURIComponent(country)}&limit=1&appid=${this.API_KEY}`
+            `${this.GEO_URL}/direct?q=${encodeURIComponent(city)},${encodeURIComponent(country)}&limit=1&appid=${this.API_KEY}`,
+            { signal: AbortSignal.timeout(5000) }
         );
 
         if (!res.ok) throw new Error('Geocoding failed');
@@ -57,7 +58,8 @@ export class WeatherService {
         }
 
         const res = await fetch(
-            `${this.BASE_URL}/weather?q=${encodeURIComponent(city)}&units=${units}&appid=${this.API_KEY}`
+            `${this.BASE_URL}/weather?q=${encodeURIComponent(city)}&units=${units}&appid=${this.API_KEY}`,
+            { signal: AbortSignal.timeout(5000) }
         );
 
         if (res.status === 401) throw new Error('Invalid API key');
@@ -75,7 +77,8 @@ export class WeatherService {
         }
 
         const res = await fetch(
-            `${this.BASE_URL}/weather?lat=${lat}&lon=${lon}&units=${units}&appid=${this.API_KEY}`
+            `${this.BASE_URL}/weather?lat=${lat}&lon=${lon}&units=${units}&appid=${this.API_KEY}`,
+            { signal: AbortSignal.timeout(5000) }
         );
 
         if (res.status === 401) throw new Error('Invalid API key');
@@ -104,7 +107,8 @@ export class WeatherService {
         if (!this.API_KEY) throw new Error('API key not configured');
 
         const res = await fetch(
-            `${this.BASE_URL}/forecast?q=${encodeURIComponent(city)}&units=${units}&appid=${this.API_KEY}`
+            `${this.BASE_URL}/forecast?q=${encodeURIComponent(city)}&units=${units}&appid=${this.API_KEY}`,
+            { signal: AbortSignal.timeout(5000) }
         );
 
         if (!res.ok) throw new Error(`Forecast API error: ${res.statusText}`);
@@ -120,7 +124,8 @@ export class WeatherService {
         if (!this.API_KEY) throw new Error('API key not configured');
 
         const res = await fetch(
-            `${this.BASE_URL}/forecast?lat=${lat}&lon=${lon}&units=${units}&appid=${this.API_KEY}`
+            `${this.BASE_URL}/forecast?lat=${lat}&lon=${lon}&units=${units}&appid=${this.API_KEY}`,
+            { signal: AbortSignal.timeout(5000) }
         );
 
         if (!res.ok) throw new Error(`Forecast API error: ${res.statusText}`);
