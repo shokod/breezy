@@ -2,18 +2,29 @@
 
 import { useState, useEffect } from 'react';
 import styles from './LocationDashboard.module.css';
-import { useLocations, usePreferences, useSyncWeather } from '@/hooks/useWeather';
-import type { Location } from '@/../database/schema';
-import WeatherCard, { ExtendedLocation } from './WeatherCard';
-import AddLocationForm from './AddLocationForm';
-import SyncButton from './SyncButton';
+import { useLocations, usePreferences, useSyncWeather, ExtendedLocation } from '@/hooks/useWeather';
+import AppShell from '../layout/AppShell';
+import WeatherHero from './WeatherHero';
+import WeatherDetails from './WeatherDetails';
 import PreferencesModal from './PreferencesModal';
+import AddLocationModal from './AddLocationModal';
 
 export default function LocationDashboard() {
     const { data: locations, isLoading: locationsLoading, isError } = useLocations();
     const { data: preferences } = usePreferences();
     const syncMutation = useSyncWeather();
+
+    // UI State
+    const [selectedLocationId, setSelectedLocationId] = useState<number | null>(null);
     const [showSettings, setShowSettings] = useState(false);
+    const [showAddLocation, setShowAddLocation] = useState(false);
+
+    // Initial Selection
+    useEffect(() => {
+        if (locations && locations.length > 0 && selectedLocationId === null) {
+            setSelectedLocationId(locations[0].id);
+        }
+    }, [locations, selectedLocationId]);
 
     // Background Sync
     useEffect(() => {
@@ -27,36 +38,66 @@ export default function LocationDashboard() {
         return () => clearInterval(intervalId);
     }, [preferences?.refreshIntervalMinutes, syncMutation]);
 
-    if (locationsLoading) return <div className={styles.loading}>Loading your weather...</div>;
-    if (isError) return <div className={styles.error}>Failed to load locations.</div>;
-
     const units = preferences?.units || 'metric';
 
+    // Determine basic condition for background
+    // If loading, we don't have a selected location yet, so let it be undefined (handled by AppShell/CSS)
+    const selectedLocation = locations?.find((l: ExtendedLocation) => l.id === selectedLocationId);
+    const hasLocations = locations && locations.length > 0;
+
+    // Day/Night logic (placeholder)
+    const isDay = true;
+    const weatherCondition = selectedLocation?.latestWeather?.description;
+
     return (
-        <div className={styles.container}>
-            <div className={styles.actions}>
-                <button
-                    className={styles.settingsBtn}
-                    onClick={() => setShowSettings(true)}
-                    title="Settings"
-                >
-                    ⚙️
-                </button>
-                <AddLocationForm />
-                <SyncButton />
+        <AppShell
+            locations={locations || []}
+        >
+            <div className="mb-8 border-b border-[var(--card-border)] pb-6">
+                <h1 className="text-3xl font-bold text-[var(--foreground)]">Breezy Weather</h1>
+                <p className="text-[var(--text-secondary)]">Track and manage your favorite city forecasts</p>
             </div>
 
-            <div className={styles.grid}>
-                {!locations || locations.length === 0 ? (
-                    <div className={styles.empty}>No locations tracked yet. Add one above!</div>
-                ) : (
-                    locations.map((loc: ExtendedLocation) => (
-                        <WeatherCard key={loc.id} location={loc} units={units} />
-                    ))
-                )}
-            </div>
+            {locationsLoading ? (
+                <div className={styles.loading}>Loading Breezy...</div>
+            ) : isError ? (
+                <div className={styles.error}>Failed to load locations.</div>
+            ) : hasLocations && selectedLocation ? (
+                <>
+                    {selectedLocation.latestWeather ? (
+                        <>
+                            <WeatherHero
+                                locationName={selectedLocation.name}
+                                weather={selectedLocation.latestWeather}
+                                units={units}
+                            />
+                            <WeatherDetails
+                                weather={selectedLocation.latestWeather}
+                                units={units}
+                            />
+                        </>
+                    ) : (
+                        <div className={styles.emptyState}>
+                            <h2>No Data Available</h2>
+                            <p>Waiting for weather data to sync...</p>
+                            <button onClick={() => syncMutation.mutate()} className={styles.btn}>
+                                Try Syncing Now
+                            </button>
+                        </div>
+                    )}
+                </>
+            ) : (
+                <div className={styles.emptyState}>
+                    <h1>Welcome to Breezy</h1>
+                    <p>Add your first city to get started.</p>
+                    <button onClick={() => setShowAddLocation(true)} className={styles.btnPrimary}>
+                        + Add City
+                    </button>
+                </div>
+            )}
 
             {showSettings && <PreferencesModal onClose={() => setShowSettings(false)} />}
-        </div>
+            {showAddLocation && <AddLocationModal onClose={() => setShowAddLocation(false)} />}
+        </AppShell>
     );
 }

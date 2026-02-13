@@ -1,5 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import type { Location, WeatherSnapshot } from '@/../database/schema';
+
+export interface ExtendedLocation extends Location {
+    latestWeather: WeatherSnapshot | null;
+}
 
 export function useLocations() {
     return useQuery({

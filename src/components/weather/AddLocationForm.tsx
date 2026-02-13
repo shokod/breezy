@@ -4,7 +4,11 @@ import { useState } from 'react';
 import styles from './AddLocationForm.module.css';
 import { useAddLocation } from '@/hooks/useWeather';
 
-export default function AddLocationForm() {
+interface AddLocationFormProps {
+    onSuccess?: () => void;
+}
+
+export default function AddLocationForm({ onSuccess }: AddLocationFormProps) {
     const [city, setCity] = useState('');
     const [country, setCountry] = useState('');
     const addMutation = useAddLocation();
@@ -17,6 +21,7 @@ export default function AddLocationForm() {
             onSuccess: () => {
                 setCity('');
                 setCountry('');
+                onSuccess?.();
             }
         });
     };

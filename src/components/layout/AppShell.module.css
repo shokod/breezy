@@ -1,0 +1,26 @@
+.shell {
+    position: relative;
+    min-height: 100vh;
+    width: 100%;
+    overflow-x: hidden;
+    background: var(--background);
+    /* Removing flex since sidebar is fixed and main handles padding */
+}
+
+/* Sidebar is fixed, so we need to account for it in the main content layout */
+.main {
+    width: 100%;
+    padding: 2rem;
+    padding-left: calc(var(--sidebar-width) + 2rem);
+    /* 280px + 32px padding */
+    min-height: 100vh;
+    background: var(--gray-50);
+}
+
+@media (max-width: 768px) {
+    .main {
+        padding-left: 2rem;
+        padding-bottom: 100px;
+        /* Space for bottom nav */
+    }
+}

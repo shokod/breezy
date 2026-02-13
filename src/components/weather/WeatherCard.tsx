@@ -2,13 +2,9 @@
 
 import { useState } from 'react';
 import styles from './WeatherCard.module.css';
-import { useUpdateLocation, useDeleteLocation } from '@/hooks/useWeather';
+import { useUpdateLocation, useDeleteLocation, ExtendedLocation } from '@/hooks/useWeather';
 import ForecastModal from './ForecastModal';
 import type { Location, WeatherSnapshot } from '@/../database/schema';
-
-export interface ExtendedLocation extends Location {
-    latestWeather: WeatherSnapshot | null;
-}
 
 interface WeatherCardProps {
     location: ExtendedLocation;
