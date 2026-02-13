@@ -1,9 +1,7 @@
-'use client';
-
 import { useState } from 'react';
 import styles from './CurrentWeatherPanel.module.css';
 import { WeatherData } from '@/services/weather';
-import { Search, MapPin, CloudRain, Cloud } from 'lucide-react';
+import { Search, MapPin, CloudRain, Cloud, Star, Trash2 } from 'lucide-react';
 
 interface WeatherDisplayData {
     temp: number;
@@ -20,11 +18,22 @@ interface WeatherDisplayData {
 interface CurrentWeatherPanelProps {
     weather: WeatherDisplayData;
     locationName: string;
+    isFavorite: boolean;
     units: 'metric' | 'imperial' | 'standard';
     onSearch: (query: string) => void;
+    onToggleFavorite: () => void;
+    onDelete: () => void;
 }
 
-export default function CurrentWeatherPanel({ weather, locationName, units, onSearch }: CurrentWeatherPanelProps) {
+export default function CurrentWeatherPanel({
+    weather,
+    locationName,
+    isFavorite,
+    units,
+    onSearch,
+    onToggleFavorite,
+    onDelete
+}: CurrentWeatherPanelProps) {
     const [searchQuery, setSearchQuery] = useState('');
     const tempUnit = units === 'metric' ? '°C' : units === 'imperial' ? '°F' : 'K';
 
@@ -52,16 +61,34 @@ export default function CurrentWeatherPanel({ weather, locationName, units, onSe
 
     return (
         <div className={styles.panel}>
-            <div className={styles.search}>
-                <Search size={18} />
-                <input
-                    type="text"
-                    placeholder="Search for places ..."
-                    className={styles.searchInput}
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                />
+            <div className={styles.topBar}>
+                <div className={styles.search}>
+                    <Search size={18} />
+                    <input
+                        type="text"
+                        placeholder="Search for places ..."
+                        className={styles.searchInput}
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onKeyDown={handleKeyDown}
+                    />
+                </div>
+                <div className={styles.actions}>
+                    <button
+                        onClick={onToggleFavorite}
+                        className={`${styles.actionBtn} ${isFavorite ? styles.favorite : ''}`}
+                        aria-label="Toggle favorite"
+                    >
+                        <Star size={20} fill={isFavorite ? "currentColor" : "none"} />
+                    </button>
+                    <button
+                        onClick={onDelete}
+                        className={`${styles.actionBtn} ${styles.delete}`}
+                        aria-label="Delete location"
+                    >
+                        <Trash2 size={20} />
+                    </button>
+                </div>
             </div>
 
             <div className={styles.weatherIconContainer}>

@@ -71,4 +71,4 @@ pnpm run test
 Tests cover service layer logic, geocoding resolution, and data normalization.
 
 ---
-Built with ❤️ by Antigravity
+Built with ❤️ by Delvin Shoko

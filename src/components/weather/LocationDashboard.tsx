@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import styles from './LocationDashboard.module.css';
-import { useLocations, usePreferences, useSyncWeather, ExtendedLocation } from '@/hooks/useWeather';
+import { useLocations, usePreferences, useSyncWeather, useUpdateLocation, useDeleteLocation, ExtendedLocation } from '@/hooks/useWeather';
 import AppShell from '../layout/AppShell';
 import CurrentWeatherPanel from './CurrentWeatherPanel';
 import ForecastStrip from './ForecastStrip';
@@ -14,6 +14,8 @@ export default function LocationDashboard() {
     const { data: locations, isLoading: locationsLoading, isError } = useLocations();
     const { data: preferences } = usePreferences();
     const syncMutation = useSyncWeather();
+    const updateMutation = useUpdateLocation();
+    const deleteMutation = useDeleteLocation();
 
     // UI State
     const [selectedLocationId, setSelectedLocationId] = useState<number | null>(null);
@@ -64,10 +66,25 @@ export default function LocationDashboard() {
                         <CurrentWeatherPanel
                             weather={selectedLocation.latestWeather}
                             locationName={selectedLocation.name}
+                            isFavorite={selectedLocation.isFavorite}
                             units={units}
                             onSearch={(query) => {
                                 setAddLocationInitialCity(query);
                                 setShowAddLocation(true);
+                            }}
+                            onToggleFavorite={() => {
+                                updateMutation.mutate({
+                                    id: selectedLocation.id,
+                                    isFavorite: !selectedLocation.isFavorite
+                                });
+                            }}
+                            onDelete={() => {
+                                if (confirm(`Remove ${selectedLocation.name}?`)) {
+                                    const nextId = locations?.find((l: ExtendedLocation) => l.id !== selectedLocation.id)?.id || null;
+                                    deleteMutation.mutate(selectedLocation.id, {
+                                        onSuccess: () => setSelectedLocationId(nextId)
+                                    });
+                                }
                             }}
                         />
                     </div>
