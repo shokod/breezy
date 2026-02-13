@@ -27,6 +27,7 @@ export async function POST() {
                     humidity: weather.humidity,
                     windSpeed: weather.windSpeed,
                     pressure: weather.pressure,
+                    timezone: weather.timezone,
                 });
 
                 results.push({ id: location.id, status: 'success' });

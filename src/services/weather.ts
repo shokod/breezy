@@ -1,4 +1,4 @@
-import { WeatherData, ForecastData } from '@/types/weather'; // We might need to move types if they are circular, but for now let's keep them here or export them from here.
+import { WeatherData, ForecastData } from '@/types/weather';
 
 export interface WeatherData {
     temp: number;
@@ -10,6 +10,7 @@ export interface WeatherData {
     humidity: number;
     windSpeed: number;
     pressure: number;
+    timezone: number; // Offset in seconds from UTC
     dt: number;
     dt_txt?: string;
 }
@@ -94,6 +95,7 @@ export class WeatherService {
             humidity: 50,
             windSpeed: 5,
             pressure: 1012,
+            timezone: 0,
             dt: Math.floor(Date.now() / 1000),
         };
     }
@@ -141,6 +143,7 @@ export class WeatherService {
             humidity: data.main.humidity,
             windSpeed: data.wind.speed,
             pressure: data.main.pressure,
+            timezone: data.timezone,
             dt: data.dt,
             dt_txt: data.dt_txt,
         };

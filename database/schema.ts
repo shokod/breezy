@@ -22,6 +22,7 @@ export const weatherSnapshots = sqliteTable('weather_snapshots', {
     humidity: integer('humidity'),
     windSpeed: real('wind_speed'),
     pressure: integer('pressure'),
+    timezone: integer('timezone').default(0).notNull(), // Offset in seconds from UTC
     timestamp: integer('timestamp', { mode: 'timestamp' }).$defaultFn(() => new Date()).notNull(),
 });
 

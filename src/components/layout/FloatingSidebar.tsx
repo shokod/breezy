@@ -21,6 +21,8 @@ export default function FloatingSidebar({
     units
 }: FloatingSidebarProps) {
 
+    const [filter, setFilter] = useState<'all' | 'favorites'>('all');
+
     const getTempUnit = () => {
         switch (units) {
             case 'imperial': return '°F';
@@ -38,22 +40,42 @@ export default function FloatingSidebar({
 
             <div className={styles.locationHelper}>Saved Locations</div>
 
+            <div className={styles.filterTabs}>
+                <button
+                    className={`${styles.filterTab} ${filter === 'all' ? styles.activeFilter : ''}`}
+                    onClick={() => setFilter('all')}
+                >
+                    All
+                </button>
+                <button
+                    className={`${styles.filterTab} ${filter === 'favorites' ? styles.activeFilter : ''}`}
+                    onClick={() => setFilter('favorites')}
+                >
+                    Favorites
+                </button>
+            </div>
+
             <div className={styles.locationsList}>
-                {locations.map((loc) => (
-                    <div
-                        key={loc.id}
-                        className={`${styles.locationItem} ${selectedLocationId === loc.id ? styles.active : ''}`}
-                        onClick={() => onSelectLocation(loc.id)}
-                    >
-                        <MapPin size={18} />
-                        <span style={{ flex: 1 }}>{loc.name}</span>
-                        {loc.latestWeather && (
-                            <span className={styles.temp}>
-                                {Math.round(loc.latestWeather.temp)}{getTempUnit()}
-                            </span>
-                        )}
-                    </div>
-                ))}
+                {locations
+                    .filter(loc => filter === 'all' || loc.isFavorite)
+                    .map((loc) => (
+                        <div
+                            key={loc.id}
+                            className={`${styles.locationItem} ${selectedLocationId === loc.id ? styles.active : ''}`}
+                            onClick={() => onSelectLocation(loc.id)}
+                        >
+                            <MapPin size={18} />
+                            <span style={{ flex: 1 }}>{loc.name}</span>
+                            {loc.latestWeather && (
+                                <span className={styles.temp}>
+                                    {Math.round(loc.latestWeather.temp)}{getTempUnit()}
+                                </span>
+                            )}
+                        </div>
+                    ))}
+                {filter === 'favorites' && locations.filter(l => l.isFavorite).length === 0 && (
+                    <div className={styles.emptyFilter}>No favorites yet</div>
+                )}
             </div>
 
             <div className={styles.footer}>

@@ -1,5 +1,4 @@
-'use client';
-
+import { useState } from 'react';
 import { useForecast } from '@/hooks/useWeather';
 import styles from './ForecastStrip.module.css';
 
@@ -11,6 +10,8 @@ interface ForecastStripProps {
 export default function ForecastStrip({ locationName, units }: ForecastStripProps) {
     const { data: forecast, isLoading } = useForecast(locationName, units);
 
+    const [activeTab, setActiveTab] = useState<'today' | 'week'>('week');
+
     if (isLoading) {
         return <div className="text-center py-8 text-[var(--text-muted)]">Loading forecast...</div>;
     }
@@ -19,36 +20,63 @@ export default function ForecastStrip({ locationName, units }: ForecastStripProp
         return <div className="text-center py-8 text-red-500">Unable to load forecast data.</div>;
     }
 
-    // Process forecast to get daily highlights (simplified)
-    // The API returns 3-hour intervals. We'll pick one midday slot per day for simplicity here.
+    // Process forecast
+    // Week: Daily highlights (midday)
     const dailyForecasts = forecast.list.filter((item: any) => item.dt_txt.includes('12:00:00')).slice(0, 7);
+
+    // Today: Next 24 hours (8 x 3-hour intervals)
+    const hourlyForecasts = forecast.list.slice(0, 8);
+
+    const itemsToDisplay = activeTab === 'week' ? dailyForecasts : hourlyForecasts;
 
     return (
         <div className={styles.container}>
             <div className={styles.header}>
                 <div className={styles.tabs}>
-                    <div className={styles.tab}>Today</div>
-                    <div className={`${styles.tab} ${styles.activeTab}`}>Week</div>
+                    <button
+                        className={`${styles.tab} ${activeTab === 'today' ? styles.activeTab : ''}`}
+                        onClick={() => setActiveTab('today')}
+                    >
+                        Today
+                    </button>
+                    <button
+                        className={`${styles.tab} ${activeTab === 'week' ? styles.activeTab : ''}`}
+                        onClick={() => setActiveTab('week')}
+                    >
+                        Week
+                    </button>
                 </div>
             </div>
 
             <div className={styles.grid}>
-                {dailyForecasts.map((day: any) => {
-                    const date = new Date(day.dt * 1000);
-                    const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
-                    const iconUrl = `https://openweathermap.org/img/wn/${day.icon}.png`;
+                {itemsToDisplay.length === 0 ? (
+                    <div className="col-span-full text-center py-4 text-[var(--text-muted)]">
+                        No forecast data available.
+                    </div>
+                ) : (
+                    itemsToDisplay.map((item: any) => {
+                        const date = new Date(item.dt * 1000);
+                        // For "Today", show time. For "Week", show day name.
+                        const label = activeTab === 'today'
+                            ? date.toLocaleTimeString('en-US', { hour: 'numeric', hour12: true })
+                            : date.toLocaleDateString('en-US', { weekday: 'short' });
 
-                    return (
-                        <div key={day.dt} className={styles.card}>
-                            <div className={styles.day}>{dayName}</div>
-                            <img src={iconUrl} alt={day.description} className={styles.icon} />
-                            <div className={styles.temps}>
-                                <span className={styles.maxTemp}>{Math.round(day.temp_max || day.temp)}°</span>
-                                <span className={styles.minTemp}>{Math.round(day.temp_min || day.temp)}°</span>
+                        const iconUrl = `https://openweathermap.org/img/wn/${item.icon}.png`;
+
+                        return (
+                            <div key={item.dt} className={styles.card}>
+                                <div className={styles.day}>{label}</div>
+                                <img src={iconUrl} alt={item.description} className={styles.icon} />
+                                <div className={styles.temps}>
+                                    <span className={styles.maxTemp}>{Math.round(item.temp_max || item.temp)}°</span>
+                                    {activeTab === 'week' && (
+                                        <span className={styles.minTemp}>{Math.round(item.temp_min || item.temp)}°</span>
+                                    )}
+                                </div>
                             </div>
-                        </div>
-                    );
-                })}
+                        );
+                    })
+                )}
             </div>
         </div>
     );

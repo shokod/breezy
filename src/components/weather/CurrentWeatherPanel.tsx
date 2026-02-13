@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import styles from './CurrentWeatherPanel.module.css';
 import { WeatherData } from '@/services/weather';
 import { Search, MapPin, CloudRain, Cloud, Star, Trash2 } from 'lucide-react';
@@ -13,6 +13,7 @@ interface WeatherDisplayData {
     humidity?: number | null;
     feelsLike?: number | null;
     pressure?: number | null;
+    timezone?: number;
 }
 
 interface CurrentWeatherPanelProps {
@@ -37,17 +38,31 @@ export default function CurrentWeatherPanel({
     const [searchQuery, setSearchQuery] = useState('');
     const tempUnit = units === 'metric' ? '°C' : units === 'imperial' ? '°F' : 'K';
 
-    // Format date: "Monday, 16:00"
-    // weather.dt might be undefined if coming from DB snapshot which uses timestamp
-    // weather.timestamp comes from DB.
-    const dateObj = weather.dt ? new Date(weather.dt * 1000) : new Date(weather.timestamp || Date.now());
-    const isValidDate = !isNaN(dateObj.getTime());
+    // Calculate local time
+    // weather.dt is Unix timestamp (seconds)
+    // weather.timezone is shift in seconds from UTC
+    const [now, setNow] = useState(Date.now());
 
-    // Fallback to now if invalid (shouldn't happen with valid DB data)
-    const finalDate = isValidDate ? dateObj : new Date();
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setNow(Date.now());
+        }, 60000); // Update every minute
+        return () => clearInterval(timer);
+    }, []);
 
-    const dayName = finalDate.toLocaleDateString('en-US', { weekday: 'long' });
-    const timeString = finalDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    // Timezone offset is in seconds
+    const timezoneOffset = weather.timezone || 0;
+
+    // We want to show the current time at the location.
+    // 'now' is local system time (UTC based timestamp).
+    // To get the location's time:
+    // 1. Get UTC time
+    // 2. Add location offset
+    const utcTime = now + (new Date().getTimezoneOffset() * 60000); // Adjust local 'now' to UTC
+    const locationTime = new Date(utcTime + (timezoneOffset * 1000));
+
+    const dayName = locationTime.toLocaleDateString('en-US', { weekday: 'long' });
+    const timeString = locationTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 
     // Weather icon URL
     const iconUrl = `https://openweathermap.org/img/wn/${weather.icon}@4x.png`;

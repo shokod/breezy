@@ -79,6 +79,7 @@ export async function POST(req: Request) {
                 humidity: weather.humidity,
                 windSpeed: weather.windSpeed,
                 pressure: weather.pressure,
+                timezone: weather.timezone,
             }).returning();
             latestWeather = snapshot;
         } catch (fetchError) {
