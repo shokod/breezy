@@ -66,7 +66,27 @@ export async function POST(req: Request) {
             lon: coords.lon,
         }).returning();
 
-        return NextResponse.json(newLocation, { status: 201 });
+        // 3. Initial Fetch (Auto-fetch)
+        let latestWeather = null;
+        try {
+            const weather = await WeatherService.getWeatherByCoordinates(newLocation.lat, newLocation.lon);
+            const [snapshot] = await db.insert(weatherSnapshots).values({
+                locationId: newLocation.id,
+                temp: weather.temp,
+                feelsLike: weather.feelsLike,
+                description: weather.description,
+                icon: weather.icon,
+                humidity: weather.humidity,
+                windSpeed: weather.windSpeed,
+                pressure: weather.pressure,
+            }).returning();
+            latestWeather = snapshot;
+        } catch (fetchError) {
+            console.error('Initial weather fetch failed:', fetchError);
+            // Allow creation to succeed even if initial fetch fails
+        }
+
+        return NextResponse.json({ ...newLocation, latestWeather }, { status: 201 });
     } catch (error) {
         console.error('Failed to create location:', error);
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });

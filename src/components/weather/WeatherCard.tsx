@@ -12,9 +12,10 @@ export interface ExtendedLocation extends Location {
 
 interface WeatherCardProps {
     location: ExtendedLocation;
+    units: 'metric' | 'imperial' | 'standard';
 }
 
-export default function WeatherCard({ location }: WeatherCardProps) {
+export default function WeatherCard({ location, units }: WeatherCardProps) {
     const [showForecast, setShowForecast] = useState(false);
     const updateMutation = useUpdateLocation();
     const deleteMutation = useDeleteLocation();
@@ -30,6 +31,21 @@ export default function WeatherCard({ location }: WeatherCardProps) {
     const removeLocation = () => {
         if (confirm(`Remove ${location.name}?`)) {
             deleteMutation.mutate(location.id);
+        }
+    };
+
+    const getTempUnit = () => {
+        switch (units) {
+            case 'imperial': return '°F';
+            case 'standard': return 'K';
+            default: return '°C';
+        }
+    };
+
+    const getSpeedUnit = () => {
+        switch (units) {
+            case 'imperial': return 'mph';
+            default: return 'm/s';
         }
     };
 
@@ -53,7 +69,7 @@ export default function WeatherCard({ location }: WeatherCardProps) {
             {weather ? (
                 <div className={styles.weatherInfo}>
                     <div className={styles.tempSection}>
-                        <span className={styles.temp}>{Math.round(weather.temp)}°</span>
+                        <span className={styles.temp}>{Math.round(weather.temp)}{getTempUnit()}</span>
                         <img
                             src={`https://openweathermap.org/img/wn/${weather.icon}@2x.png`}
                             alt={weather.description}
@@ -63,7 +79,7 @@ export default function WeatherCard({ location }: WeatherCardProps) {
                     <p className={styles.description}>{weather.description}</p>
                     <div className={styles.details}>
                         <span>Humidity: {weather.humidity}%</span>
-                        <span>Wind: {weather.windSpeed}m/s</span>
+                        <span>Wind: {weather.windSpeed}{getSpeedUnit()}</span>
                     </div>
                     <button
                         className={styles.forecastBtn}
@@ -92,6 +108,7 @@ export default function WeatherCard({ location }: WeatherCardProps) {
                 <ForecastModal
                     locationId={location.id}
                     locationName={location.name}
+                    units={units}
                     onClose={() => setShowForecast(false)}
                 />
             )}

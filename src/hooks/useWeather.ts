@@ -92,3 +92,35 @@ export function useSyncWeather() {
         },
     });
 }
+
+export function usePreferences() {
+    return useQuery({
+        queryKey: ['preferences'],
+        queryFn: async () => {
+            const res = await fetch('/api/preferences');
+            if (!res.ok) throw new Error('Failed to fetch preferences');
+            return res.json();
+        },
+    });
+}
+
+export function useUpdatePreferences() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async (data: { units?: 'metric' | 'imperial' | 'standard'; refreshIntervalMinutes?: number }) => {
+            const res = await fetch('/api/preferences', {
+                method: 'PATCH',
+                body: JSON.stringify(data),
+            });
+            if (!res.ok) throw new Error('Failed to update preferences');
+            return res.json();
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['preferences'] });
+            toast.success('Preferences updated');
+        },
+        onError: (error: Error) => {
+            toast.error(error.message);
+        },
+    });
+}

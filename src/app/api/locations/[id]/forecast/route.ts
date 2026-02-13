@@ -24,7 +24,10 @@ export async function GET(
             return NextResponse.json({ error: 'Location not found' }, { status: 404 });
         }
 
-        const forecast = await WeatherService.getForecastByCoordinates(location.lat, location.lon);
+        const { searchParams } = new URL(req.url);
+        const units = searchParams.get('units') || 'metric';
+
+        const forecast = await WeatherService.getForecastByCoordinates(location.lat, location.lon, units);
 
         return NextResponse.json(forecast, { status: 200 });
     } catch (error) {

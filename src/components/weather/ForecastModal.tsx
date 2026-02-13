@@ -7,10 +7,11 @@ import type { ForecastData } from '@/services/weather';
 interface ForecastModalProps {
     locationId: number;
     locationName: string;
+    units: 'metric' | 'imperial' | 'standard';
     onClose: () => void;
 }
 
-export default function ForecastModal({ locationId, locationName, onClose }: ForecastModalProps) {
+export default function ForecastModal({ locationId, locationName, units, onClose }: ForecastModalProps) {
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
@@ -23,13 +24,21 @@ export default function ForecastModal({ locationId, locationName, onClose }: For
     }, []);
 
     const { data, isLoading, isError } = useQuery<ForecastData>({
-        queryKey: ['forecast', locationId],
+        queryKey: ['forecast', locationId, units],
         queryFn: async () => {
-            const res = await fetch(`/api/locations/${locationId}/forecast`);
+            const res = await fetch(`/api/locations/${locationId}/forecast?units=${units}`);
             if (!res.ok) throw new Error('Failed to fetch forecast');
             return res.json();
         },
     });
+
+    const getTempUnit = () => {
+        switch (units) {
+            case 'imperial': return '°F';
+            case 'standard': return 'K';
+            default: return '°C';
+        }
+    };
 
     if (!mounted) return null;
 
@@ -56,7 +65,7 @@ export default function ForecastModal({ locationId, locationName, onClose }: For
                                     alt={item.description}
                                     className={styles.icon}
                                 />
-                                <span className={styles.temp}>{Math.round(item.temp)}°</span>
+                                <span className={styles.temp}>{Math.round(item.temp)}{getTempUnit()}</span>
                                 <span className={styles.desc}>{item.description}</span>
                             </div>
                         ))}

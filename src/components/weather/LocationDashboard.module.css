@@ -1,35 +1,52 @@
 .container {
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
+    width: 100%;
 }
 
 .actions {
     display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 2rem;
-    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.settingsBtn {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    width: 40px;
+    height: 40px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background-color 0.2s;
+    color: var(--text-primary);
+}
+
+.settingsBtn:hover {
+    background-color: var(--hover-bg);
 }
 
 .grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 1.5rem;
+    gap: 24px;
 }
 
 .loading,
+.error,
 .empty {
     text-align: center;
-    padding: 4rem;
-    color: var(--secondary);
+    padding: 48px;
+    color: var(--text-secondary);
     background: var(--card-bg);
-    border-radius: var(--radius);
-    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    border: 1px dashed var(--border-color);
 }
 
-.syncInfo {
-    font-size: 0.85rem;
-    color: var(--secondary);
-    margin-top: -1rem;
+.error {
+    color: #ef4444;
+    border-color: #fca5a5;
 }
