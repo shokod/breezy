@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import type { Location, WeatherSnapshot } from '@/../database/schema';
+import type { ForecastData } from '@/services/weather';
 
 export interface ExtendedLocation extends Location {
     latestWeather: WeatherSnapshot | null;
@@ -127,5 +128,30 @@ export function useUpdatePreferences() {
         onError: (error: Error) => {
             toast.error(error.message);
         },
+    });
+}
+
+export function useForecast(city: string, units: 'metric' | 'imperial' | 'standard' = 'metric') {
+    return useQuery<ForecastData, Error>({
+        queryKey: ['forecast', city, units],
+        queryFn: async () => {
+            // We can call the service directly since it's a client-side fetch wrapper, 
+            // BUT getForecast in services/weather.ts uses server-side env vars (process.env.OPENWEATHER_API_KEY).
+            // process.env is not available in client components/hooks in the same way for secrets.
+            // However, we recently made getForecast exportable.
+            // IF getForecast uses API_KEY, it will fail on client if NEXT_PUBLIC_ is not used.
+            // Let's check weather.ts again. It uses process.env.OPENWEATHER_API_KEY.
+            // This means we CANNOT call getForecast from the client directly if the key is server-only.
+            // We need an API route for forecast OR use a server action OR expose the key (bad).
+            // Given the existing pattern (api/locations, api/weather/sync), we should probably have an api/weather/forecast route 
+            // OR just call the service if it's a server action. 
+            // Wait, services/weather.ts is just a class. It's not a server action.
+            // So we need to create an API route `/api/weather/forecast` or similar.
+
+            const res = await fetch(`/api/weather/forecast?city=${encodeURIComponent(city)}&units=${units}`);
+            if (!res.ok) throw new Error('Failed to fetch forecast');
+            return res.json();
+        },
+        enabled: !!city,
     });
 }

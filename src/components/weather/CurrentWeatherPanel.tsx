@@ -5,8 +5,20 @@ import styles from './CurrentWeatherPanel.module.css';
 import { WeatherData } from '@/services/weather';
 import { Search, MapPin, CloudRain, Cloud } from 'lucide-react';
 
+interface WeatherDisplayData {
+    temp: number;
+    description: string;
+    icon: string;
+    dt?: number;
+    timestamp?: Date | string;
+    windSpeed?: number | null;
+    humidity?: number | null;
+    feelsLike?: number | null;
+    pressure?: number | null;
+}
+
 interface CurrentWeatherPanelProps {
-    weather: WeatherData;
+    weather: WeatherDisplayData;
     locationName: string;
     units: 'metric' | 'imperial' | 'standard';
     onSearch: (query: string) => void;
@@ -17,9 +29,16 @@ export default function CurrentWeatherPanel({ weather, locationName, units, onSe
     const tempUnit = units === 'metric' ? '°C' : units === 'imperial' ? '°F' : 'K';
 
     // Format date: "Monday, 16:00"
-    const date = new Date(weather.dt * 1000);
-    const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });
-    const timeString = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    // weather.dt might be undefined if coming from DB snapshot which uses timestamp
+    // weather.timestamp comes from DB.
+    const dateObj = weather.dt ? new Date(weather.dt * 1000) : new Date(weather.timestamp || Date.now());
+    const isValidDate = !isNaN(dateObj.getTime());
+
+    // Fallback to now if invalid (shouldn't happen with valid DB data)
+    const finalDate = isValidDate ? dateObj : new Date();
+
+    const dayName = finalDate.toLocaleDateString('en-US', { weekday: 'long' });
+    const timeString = finalDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 
     // Weather icon URL
     const iconUrl = `https://openweathermap.org/img/wn/${weather.icon}@4x.png`;

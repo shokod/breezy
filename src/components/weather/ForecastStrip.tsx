@@ -1,7 +1,6 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
-import { getForecast } from '@/services/weather';
+import { useForecast } from '@/hooks/useWeather';
 import styles from './ForecastStrip.module.css';
 
 interface ForecastStripProps {
@@ -10,11 +9,7 @@ interface ForecastStripProps {
 }
 
 export default function ForecastStrip({ locationName, units }: ForecastStripProps) {
-    const { data: forecast, isLoading } = useQuery({
-        queryKey: ['forecast', locationName, units],
-        queryFn: () => getForecast(locationName, units),
-        enabled: !!locationName,
-    });
+    const { data: forecast, isLoading } = useForecast(locationName, units);
 
     if (isLoading) {
         return <div className="text-center py-8 text-[var(--text-muted)]">Loading forecast...</div>;
@@ -41,15 +36,15 @@ export default function ForecastStrip({ locationName, units }: ForecastStripProp
                 {dailyForecasts.map((day: any) => {
                     const date = new Date(day.dt * 1000);
                     const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
-                    const iconUrl = `https://openweathermap.org/img/wn/${day.weather[0].icon}.png`;
+                    const iconUrl = `https://openweathermap.org/img/wn/${day.icon}.png`;
 
                     return (
                         <div key={day.dt} className={styles.card}>
                             <div className={styles.day}>{dayName}</div>
-                            <img src={iconUrl} alt={day.weather[0].description} className={styles.icon} />
+                            <img src={iconUrl} alt={day.description} className={styles.icon} />
                             <div className={styles.temps}>
-                                <span className={styles.maxTemp}>{Math.round(day.main.temp_max)}°</span>
-                                <span className={styles.minTemp}>{Math.round(day.main.temp_min)}°</span>
+                                <span className={styles.maxTemp}>{Math.round(day.temp_max || day.temp)}°</span>
+                                <span className={styles.minTemp}>{Math.round(day.temp_min || day.temp)}°</span>
                             </div>
                         </div>
                     );

@@ -1,5 +1,9 @@
+import { WeatherData, ForecastData } from '@/types/weather'; // We might need to move types if they are circular, but for now let's keep them here or export them from here.
+
 export interface WeatherData {
     temp: number;
+    temp_min?: number;
+    temp_max?: number;
     feelsLike: number;
     description: string;
     icon: string;
@@ -7,6 +11,7 @@ export interface WeatherData {
     windSpeed: number;
     pressure: number;
     dt: number;
+    dt_txt?: string;
 }
 
 export interface ForecastData {
@@ -27,7 +32,7 @@ export class WeatherService {
     private static GEO_URL = 'http://api.openweathermap.org/geo/1.0';
 
     static async getCoordinates(city: string, country: string): Promise<{ lat: number; lon: number }> {
-        if (!this.API_KEY) return { lat: 0, lon: 0 }; // Mock fallback
+        if (!this.API_KEY) return { lat: 0, lon: 0 };
 
         const res = await fetch(
             `${this.GEO_URL}/direct?q=${encodeURIComponent(city)},${encodeURIComponent(country)}&limit=1&appid=${this.API_KEY}`
@@ -128,6 +133,8 @@ export class WeatherService {
     private static normalizeWeatherData(data: any): WeatherData {
         return {
             temp: data.main.temp,
+            temp_min: data.main.temp_min,
+            temp_max: data.main.temp_max,
             feelsLike: data.main.feels_like,
             description: data.weather[0].description,
             icon: data.weather[0].icon,
@@ -135,6 +142,7 @@ export class WeatherService {
             windSpeed: data.wind.speed,
             pressure: data.main.pressure,
             dt: data.dt,
+            dt_txt: data.dt_txt,
         };
     }
 }

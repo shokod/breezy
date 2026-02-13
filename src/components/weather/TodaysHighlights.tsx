@@ -4,8 +4,14 @@ import styles from './TodaysHighlights.module.css';
 import { WeatherData } from '@/services/weather';
 import { Wind, Sunrise, Sunset, Droplets, Eye, Activity } from 'lucide-react';
 
+interface WeatherDisplayData {
+    windSpeed?: number | null;
+    humidity?: number | null;
+    [key: string]: any; // Allow other props
+}
+
 interface TodaysHighlightsProps {
-    weather: WeatherData;
+    weather: WeatherDisplayData;
     units: 'metric' | 'imperial' | 'standard';
 }
 
