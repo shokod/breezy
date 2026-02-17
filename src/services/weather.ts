@@ -102,7 +102,13 @@ export class WeatherService {
     }
 
     static async getForecast(city: string, units: string = 'metric'): Promise<ForecastData> {
-        if (!this.API_KEY) throw new Error('API key not configured');
+        if (!this.API_KEY) {
+            console.warn('Weather API key missing, using mock forecast data');
+            return {
+                list: Array.from({ length: 8 }, () => this.getMockWeather()),
+                city: { name: city, country: 'XX', coord: { lat: 0, lon: 0 } },
+            };
+        }
 
         const res = await fetch(
             `${this.BASE_URL}/forecast?q=${encodeURIComponent(city)}&units=${units}&appid=${this.API_KEY}`,
