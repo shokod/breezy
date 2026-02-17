@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { locations, weatherSnapshots } from '@/../database/schema';
-import { eq, desc, sql, inArray } from 'drizzle-orm';
+import { sql, inArray } from 'drizzle-orm';
 import { locationInputSchema } from '@/lib/schemas';
 import { WeatherService } from '@/services/weather';
 
@@ -25,7 +25,7 @@ export async function GET() {
             .filter((id): id is number => id !== null);
 
         // 2. Fetch the actual snapshot data
-        let latestSnapshots: any[] = [];
+        let latestSnapshots: (typeof weatherSnapshots.$inferSelect)[] = [];
         if (latestIds.length > 0) {
             latestSnapshots = await db
                 .select()
@@ -65,8 +65,8 @@ export async function POST(req: Request) {
         let coords;
         try {
             coords = await WeatherService.getCoordinates(name, country);
-        } catch (error: any) {
-            if (error.message === 'City not found') {
+        } catch (error: unknown) {
+            if (error instanceof Error && error.message === 'City not found') {
                 return NextResponse.json({ error: 'City not found. Please check the spelling.' }, { status: 404 });
             }
             throw error; // Re-throw other errors to be caught by the outer catch

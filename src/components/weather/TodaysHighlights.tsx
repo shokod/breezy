@@ -1,13 +1,12 @@
 'use client';
 
 import styles from './TodaysHighlights.module.css';
-import { WeatherData } from '@/services/weather';
 import { Wind, Sunrise, Sunset, Droplets, Eye, Activity } from 'lucide-react';
 
 interface WeatherDisplayData {
     windSpeed?: number | null;
     humidity?: number | null;
-    [key: string]: any; // Allow other props
+    [key: string]: string | number | boolean | null | undefined | Date;
 }
 
 interface TodaysHighlightsProps {
@@ -28,7 +27,7 @@ export default function TodaysHighlights({ weather, units }: TodaysHighlightsPro
 
     return (
         <div className={styles.container}>
-            <h2 className={styles.title}>Today's Highlights</h2>
+            <h2 className={styles.title}>Today&apos;s Highlights</h2>
 
             <div className={styles.grid}>
                 {/* UV Index */}

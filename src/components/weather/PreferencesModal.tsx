@@ -60,7 +60,7 @@ export default function PreferencesModal({ onClose }: PreferencesModalProps) {
                         <select
                             id="units"
                             value={units}
-                            onChange={(e) => setUnits(e.target.value as any)}
+                            onChange={(e) => setUnits(e.target.value as 'metric' | 'imperial' | 'standard')}
                             className={styles.select}
                         >
                             <option value="metric">Metric (°C, m/s)</option>

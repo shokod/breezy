@@ -4,7 +4,6 @@ import { useState } from 'react';
 import styles from './WeatherCard.module.css';
 import { useUpdateLocation, useDeleteLocation, ExtendedLocation } from '@/hooks/useWeather';
 import ForecastModal from './ForecastModal';
-import type { Location, WeatherSnapshot } from '@/../database/schema';
 
 interface WeatherCardProps {
     location: ExtendedLocation;
@@ -86,7 +85,7 @@ export default function WeatherCard({ location, units }: WeatherCardProps) {
                 </div>
             ) : (
                 <div className={styles.noWeather}>
-                    No sync data. Click "Refresh All" to fetch weather.
+                    No sync data. Click &quot;Refresh All&quot; to fetch weather.
                 </div>
             )}
 

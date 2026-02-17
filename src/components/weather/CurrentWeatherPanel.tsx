@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import styles from './CurrentWeatherPanel.module.css';
-import { WeatherData } from '@/services/weather';
-import { Search, MapPin, CloudRain, Cloud, Star, Trash2 } from 'lucide-react';
+import { Search, Cloud, Star, Trash2 } from 'lucide-react';
 
 interface WeatherDisplayData {
     temp: number;

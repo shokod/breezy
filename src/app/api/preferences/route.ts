@@ -16,8 +16,8 @@ export async function PATCH(req: Request) {
         const body = await req.json();
         const updatedPrefs = await PreferencesService.updatePreferences(body);
         return NextResponse.json(updatedPrefs, { status: 200 });
-    } catch (error: any) {
-        if (error.message.startsWith('Validation failed')) {
+    } catch (error: unknown) {
+        if (error instanceof Error && error.message.startsWith('Validation failed')) {
             return NextResponse.json({ error: error.message }, { status: 400 });
         }
         console.error('Failed to update preferences:', error);

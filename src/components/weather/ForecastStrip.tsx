@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useForecast } from '@/hooks/useWeather';
+import type { WeatherData } from '@/services/weather';
 import styles from './ForecastStrip.module.css';
 
 interface ForecastStripProps {
@@ -22,7 +23,7 @@ export default function ForecastStrip({ location, units }: ForecastStripProps) {
 
     // Process forecast
     // Week: Daily highlights (midday)
-    const dailyForecasts = forecast.list.filter((item: any) => item.dt_txt.includes('12:00:00')).slice(0, 7);
+    const dailyForecasts = forecast.list.filter((item: WeatherData) => item.dt_txt?.includes('12:00:00')).slice(0, 7);
 
     // Today: Next 24 hours (8 x 3-hour intervals)
     const hourlyForecasts = forecast.list.slice(0, 8);
@@ -54,7 +55,7 @@ export default function ForecastStrip({ location, units }: ForecastStripProps) {
                         No forecast data available.
                     </div>
                 ) : (
-                    itemsToDisplay.map((item: any) => {
+                    itemsToDisplay.map((item: WeatherData) => {
                         const date = new Date(item.dt * 1000);
                         // For "Today", show time. For "Week", show day name.
                         const label = activeTab === 'today'

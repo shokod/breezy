@@ -21,8 +21,9 @@ export async function GET(req: Request) {
         }
 
         return NextResponse.json(forecast);
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Forecast fetch error:', error);
-        return NextResponse.json({ error: error.message || 'Failed to fetch forecast' }, { status: 500 });
+        const message = error instanceof Error ? error.message : 'Failed to fetch forecast';
+        return NextResponse.json({ error: message }, { status: 500 });
     }
 }

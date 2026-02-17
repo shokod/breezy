@@ -53,9 +53,12 @@ cd breezy
 pnpm install
 
 # Setup Environment
-echo "OPENWEATHER_API_KEY=your_key_here" > .env.local
+cat <<'EOF' > .env.local
+OPENWEATHER_API_KEY=your_key_here
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+EOF
 
-# Database Setup
+# Database Setup (creates ./data/sqlite.db)
 pnpm run db:push
 ```
 
@@ -74,15 +77,30 @@ pnpm test
 
 ## 🐳 Docker
 
-Build and run the application in a container:
-
+### With docker-compose (recommended)
 ```bash
-# Build the image
-docker build -t breezy-app .
-
-# Run the container
-docker run -p 3000:3000 breezy-app
+OPENWEATHER_API_KEY=your_key_here \
+NEXT_PUBLIC_APP_URL=http://localhost:3000 \
+docker-compose up --build
 ```
+
+### With plain docker
+```bash
+# Build
+docker build --build-arg NEXT_PUBLIC_APP_URL=http://localhost:3000 -t breezy .
+
+# Run (mounts persistent SQLite at /app/data/sqlite.db)
+docker run \
+  -p 3000:3000 \
+  -e OPENWEATHER_API_KEY=your_key_here \
+  -e NEXT_PUBLIC_APP_URL=http://localhost:3000 \
+  -v breezy-data:/app/data \
+  breezy
+```
+
+Notes:
+- Database lives at `/app/data/sqlite.db` (created on first run by `drizzle-kit push`).
+- To disable Next.js telemetry, set `NEXT_TELEMETRY_DISABLED=1` during build/run.
 
 ## 🏗️ Architectural Decisions
 

@@ -1,0 +1,18 @@
+services:
+  breezy:
+    build:
+      context: .
+      args:
+        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
+    ports:
+      - "3000:3000"
+    environment:
+      OPENWEATHER_API_KEY: ${OPENWEATHER_API_KEY}
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
+      NODE_ENV: production
+    volumes:
+      - breezy-data:/app/data
+    restart: unless-stopped
+
+volumes:
+  breezy-data:

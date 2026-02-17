@@ -16,7 +16,7 @@ export default function WeatherHero({ locationName, weather, units }: WeatherHer
         }
     };
 
-    const formatDate = (weather: any) => {
+    const formatDate = (weather: WeatherData & { timestamp?: string | Date }) => {
         let date = new Date();
         if (weather.dt) {
             date = new Date(weather.dt * 1000);

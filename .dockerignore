@@ -12,3 +12,5 @@ pnpm-debug.log*
 *.tsbuildinfo
 dist
 build
+sqlite.db
+data

@@ -32,7 +32,7 @@ export class PreferencesService {
             throw new Error('Validation failed: ' + JSON.stringify(result.error.flatten()));
         }
 
-        let existing = await db.select().from(userPreferences).limit(1).get();
+        const existing = await db.select().from(userPreferences).limit(1).get();
         let updatedPrefs;
 
         if (existing) {

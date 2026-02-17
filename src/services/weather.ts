@@ -1,5 +1,3 @@
-import { WeatherData, ForecastData } from '@/types/weather';
-
 export interface WeatherData {
     temp: number;
     temp_min?: number;
@@ -54,7 +52,7 @@ export class WeatherService {
     static async getCurrentWeather(city: string, units: string = 'metric'): Promise<WeatherData> {
         if (!this.API_KEY) {
             console.warn('Weather API key missing, using mock data');
-            return this.getMockWeather(city);
+            return this.getMockWeather();
         }
 
         const res = await fetch(
@@ -73,7 +71,7 @@ export class WeatherService {
     static async getWeatherByCoordinates(lat: number, lon: number, units: string = 'metric'): Promise<WeatherData> {
         if (!this.API_KEY) {
             console.warn('Weather API key missing, using mock data');
-            return this.getMockWeather('Mock Location');
+            return this.getMockWeather();
         }
 
         const res = await fetch(
@@ -89,7 +87,7 @@ export class WeatherService {
         return this.normalizeWeatherData(data);
     }
 
-    private static getMockWeather(city: string): WeatherData {
+    private static getMockWeather(): WeatherData {
         return {
             temp: 20 + Math.random() * 10,
             feelsLike: 22,
@@ -115,13 +113,19 @@ export class WeatherService {
 
         const data = await res.json();
         return {
-            list: data.list.map((item: any) => this.normalizeWeatherData(item)),
+            list: data.list.map((item: Record<string, unknown>) => this.normalizeWeatherData(item)),
             city: data.city,
         };
     }
 
     static async getForecastByCoordinates(lat: number, lon: number, units: string = 'metric'): Promise<ForecastData> {
-        if (!this.API_KEY) throw new Error('API key not configured');
+        if (!this.API_KEY) {
+            console.warn('Weather API key missing, using mock forecast data');
+            return {
+                list: Array.from({ length: 8 }, () => this.getMockWeather()),
+                city: { name: 'Mock City', country: 'XX', coord: { lat, lon } },
+            };
+        }
 
         const res = await fetch(
             `${this.BASE_URL}/forecast?lat=${lat}&lon=${lon}&units=${units}&appid=${this.API_KEY}`,
@@ -132,12 +136,13 @@ export class WeatherService {
 
         const data = await res.json();
         return {
-            list: data.list.map((item: any) => this.normalizeWeatherData(item)),
+            list: data.list.map((item: Record<string, unknown>) => this.normalizeWeatherData(item)),
             city: data.city,
         };
     }
 
-    private static normalizeWeatherData(data: any): WeatherData {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    private static normalizeWeatherData(data: Record<string, any>): WeatherData {
         return {
             temp: data.main.temp,
             temp_min: data.main.temp_min,
